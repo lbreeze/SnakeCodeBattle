@@ -78,11 +78,6 @@ public class Snake {
                 BoardElement.EAGER_TYPES.removeAll(ENEMY_BODY);
             }
         }
-
-
-//        if (body.size() < 5)
-//        else
-//            BoardElement.GOOD_TYPES.add(BoardElement.STONE);
     }
 
     public BoardPoint getFirst() {
@@ -166,7 +161,7 @@ public class Snake {
 
         peace();
 
-        if (room.getEnemies().size() == 1) {
+        if (room.getEnemies().size() == 1 && FURY == 0) {
             if (getBody().size() > room.getEnemies().get(0).getBody().size() + 2 && !BoardElement.ENEMY_HEAD_EVIL.equals(room.getRoom()[room.getEnemies().get(0).getBody().getFirst().getX()][room.getEnemies().get(0).getBody().getFirst().getY()])) {
                 BoardElement.GOOD_TYPES.addAll(ENEMY_HEAD);
                 BoardElement.EAGER_TYPES.addAll(ENEMY_HEAD);
