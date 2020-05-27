@@ -211,6 +211,7 @@ public class Room {
             BoardElement.GOOD_TYPES.removeAll(BoardElement.ENEMY);
 
             BoardElement.EAGER_TYPES.removeAll(BoardElement.ENEMY_HEAD);
+            BoardElement.EAGER_TYPES.removeAll(BoardElement.ENEMY_BODY);
         }
 
         return result;

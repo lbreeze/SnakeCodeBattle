@@ -31,7 +31,7 @@ public class Main {
                         if (fileWriter == null) {
                             String gameFile = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
                             System.out.println(gameFile);
-                            File f = new File(gameFile);
+                            File f = new File(gameFile + ".log");
                             f.createNewFile();
                             fileWriter = new FileWriter(f, StandardCharsets.UTF_8);
                         }

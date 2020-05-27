@@ -22,6 +22,6 @@ public class Weight {
     private int connected = 0;
 
     public double getFactor() {
-        return (double) ((Math.pow(score, 2) + 1) * Math.sqrt(available) * connected) / Math.pow(moves, 4);
+        return (double) ((Math.pow(score, 2) + 1) * available * Math.pow(connected, 0.1)) / Math.pow(moves, 4);
     }
 }
