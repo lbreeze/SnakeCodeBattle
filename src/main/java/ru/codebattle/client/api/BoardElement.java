@@ -10,7 +10,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Getter
 public enum BoardElement {
-    NONE(' ', 0),         // пустое место
+    NONE(' ', 1),         // пустое место
     WALL('☼', -100),         // а это стенка
     START_FLOOR('#', -100),  // место старта змей
     OTHER('?', 0),        // этого ты никогда не увидишь :)
@@ -47,12 +47,12 @@ public enum BoardElement {
     BODY_RIGHT_UP('╚', -20),
 
     // змейки противников
-    ENEMY_HEAD_DOWN('˅', 40),
-    ENEMY_HEAD_LEFT('<', 40),
-    ENEMY_HEAD_RIGHT('>', 40),
-    ENEMY_HEAD_UP('˄', 40),
+    ENEMY_HEAD_DOWN('˅', 100),
+    ENEMY_HEAD_LEFT('<', 100),
+    ENEMY_HEAD_RIGHT('>', 100),
+    ENEMY_HEAD_UP('˄', 100),
     ENEMY_HEAD_DEAD('☺', 0),   // этот раунд противник проиграл
-    ENEMY_HEAD_EVIL('♣', -50),   // противник скушал таблетку ярости
+    ENEMY_HEAD_EVIL('♣', -100),   // противник скушал таблетку ярости
     ENEMY_HEAD_FLY('♦', 0),    // противник скушал таблетку полета
     ENEMY_HEAD_SLEEP('ø', 0),  // змейка противника ожидает начала раунда
 
@@ -64,31 +64,16 @@ public enum BoardElement {
     ENEMY_TAIL_INACTIVE('*', 0),
 
     // туловище змеек противников
-    ENEMY_BODY_HORIZONTAL('─', 20),
-    ENEMY_BODY_VERTICAL('│', 20),
-    ENEMY_BODY_LEFT_DOWN('┐', 20),
-    ENEMY_BODY_LEFT_UP('┘', 20),
-    ENEMY_BODY_RIGHT_DOWN('┌', 20),
-    ENEMY_BODY_RIGHT_UP('└', 20);
+    ENEMY_BODY_HORIZONTAL('─', -50),
+    ENEMY_BODY_VERTICAL('│', -50),
+    ENEMY_BODY_LEFT_DOWN('┐', -50),
+    ENEMY_BODY_LEFT_UP('┘', -50),
+    ENEMY_BODY_RIGHT_DOWN('┌', -50),
+    ENEMY_BODY_RIGHT_UP('└', -50);
 
     final char symbol;
     final int score;
 
-    public static final Set<BoardElement> GOOD_TYPES = new HashSet<>(Arrays.asList(NONE, APPLE, GOLD, FURY_PILL, FLYING_PILL,
-            TAIL_END_DOWN,
-            TAIL_END_LEFT,
-            TAIL_END_UP,
-            TAIL_END_RIGHT,
-            TAIL_INACTIVE
-
-            // туловище твоей змейки
-//            BODY_HORIZONTAL,
-//            BODY_VERTICAL,
-//            BODY_LEFT_DOWN,
-//            BODY_LEFT_UP,
-//            BODY_RIGHT_DOWN,
-//            BODY_RIGHT_UP
-            ));
     public static final Set<BoardElement> EAGER_TYPES = new HashSet<>(Arrays.asList(APPLE, GOLD, FURY_PILL, FLYING_PILL));
 
     public static final Set<BoardElement> HEAD = new HashSet<>(Arrays.asList(HEAD_DOWN,

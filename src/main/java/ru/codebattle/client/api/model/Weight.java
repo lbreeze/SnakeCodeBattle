@@ -21,7 +21,11 @@ public class Weight {
     @Setter
     private int connected = 0;
 
+    @Getter
+    @Setter
+    private int enemyProximity = 0;
+
     public double getFactor() {
-        return (double) ((Math.pow(score, 2) + 1) * available * Math.pow(connected, 0.1)) / Math.pow(moves, 4);
+        return (double) (score * Math.pow(available, 0.2)) / Math.pow(moves, 3); // * Math.pow(connected, 0.1)
     }
 }

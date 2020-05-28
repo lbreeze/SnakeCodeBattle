@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ru.codebattle.client.api.BoardElement.ENEMY;
-import static ru.codebattle.client.api.BoardElement.ENEMY_HEAD_DEAD;
-import static ru.codebattle.client.api.BoardElement.ENEMY_HEAD_SLEEP;
+import static ru.codebattle.client.api.BoardElement.*;
 
 public class Room {
 
@@ -93,12 +91,6 @@ public class Room {
                     break;
                 case HEAD_RIGHT:
                     Snake.LAST_MOVE = Direction.RIGHT;
-                    break;
-                case HEAD_FLY:
-                    //snake.fly();
-                    break;
-                case HEAD_EVIL:
-                    //snake.fury();
                     break;
             }
             result.setSnake(snake);
@@ -204,17 +196,34 @@ public class Room {
             }
         } else {
             //System.out.println("NEW ROUND!");
-            Snake.STONES = 0;
-            Snake.FURY = 0;
             Room.MOVE = 0;
-            BoardElement.GOOD_TYPES.remove(BoardElement.STONE);
-            BoardElement.GOOD_TYPES.removeAll(BoardElement.ENEMY);
 
             BoardElement.EAGER_TYPES.removeAll(BoardElement.ENEMY_HEAD);
             BoardElement.EAGER_TYPES.removeAll(BoardElement.ENEMY_BODY);
         }
 
         return result;
+    }
+
+    public void mergeInfo(Room previousRoom) {
+        Snake prevSnake = previousRoom.getSnake();
+        if (prevSnake != null) {
+            snake.setFury(prevSnake.getFury());
+            snake.setStones(prevSnake.getStones());
+        }
+
+        List<Snake> prevEnemies = previousRoom.getEnemies();
+        enemies.parallelStream().forEach(enemy -> {
+            prevEnemies.parallelStream()
+                    .filter(prevEnemy -> prevEnemy.getBody().contains(enemy.getBody().getLast()))
+                    .findFirst()
+                    .ifPresent(prev -> {
+                        if (previousRoom.getRoom()[enemy.getBody().getFirst().getX()][enemy.getBody().getFirst().getY()].equals(FURY_PILL)) {
+                            enemy.setFury(enemy.getFury() + 10);
+                        }
+                        enemy.setFury(prev.getFury() == 0 ? 0 : prev.getFury() - 1);
+                    });
+        });
     }
 
     public SnakeAction moveDecision() {

@@ -20,6 +20,8 @@ public class Main {
 
     private static FileWriter fileWriter = null;
 
+    private static Room previousRoom = null;
+
     public static void main(String[] args) throws URISyntaxException, IOException {
         SnakeBattleClient client = new SnakeBattleClient(SERVER_ADDRESS);
         while (true) {
@@ -41,6 +43,12 @@ public class Main {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+                    if (previousRoom != null) {
+                        room.mergeInfo(previousRoom);
+                    }
+                    previousRoom = room;
+
                     SnakeAction result = room.moveDecision();
                     return result;
                 } else {
@@ -55,6 +63,7 @@ public class Main {
                     fileWriter = null;
                     Room.MOVE = 0;
                     Room.SCORE = 0;
+                    previousRoom = null;
                     return new SnakeAction(false, Direction.values()[new Double(Math.random() * 4).intValue()]);
                 }
             });
