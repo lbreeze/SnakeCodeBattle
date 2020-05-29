@@ -16,6 +16,7 @@ import static ru.codebattle.client.api.BoardElement.*;
 public class Snake {
 
     public static Direction LAST_MOVE = Direction.RIGHT;
+    public static int FURY_TIME = 15; // длительность действия таблетки
 
     @Getter
     @Setter
@@ -129,7 +130,7 @@ public class Snake {
             stones--;
 
         if (routePoint != null && room.getRoom()[routePoint.getX()][routePoint.getY()] == BoardElement.FURY_PILL) {
-            fury += 10;
+            fury += FURY_TIME;
             fury();
         }
 
@@ -144,7 +145,7 @@ public class Snake {
         }
 
 
-        Main.writeToFile("[" + body.getFirst().getX() + ", " + body.getFirst().getY() + "] -> " + new SnakeAction(act, result) + " -> [" + destination.getX() + ", " + destination.getY() + "] FURY:" + fury);
+        Main.writeToFile("ACTION: [" + body.getFirst().getX() + ", " + body.getFirst().getY() + "] -> " + new SnakeAction(act, result) + " -> [" + destination.getX() + ", " + destination.getY() + "] FURY:" + fury);
         return new SnakeAction(act, result);
     }
 
@@ -289,11 +290,11 @@ public class Snake {
                 // TODO !!!!
                 if (entry.getValue().contains(destination) && (weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor() > 0)) {
                     routePoint = entry.getKey();
-                } else if  (2 * weightsMap[routePoint.getX()][routePoint.getY()].getFactor() < weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor()) {
+                } else if  (weightsMap[routePoint.getX()][routePoint.getY()].getFactor() < weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor()) {
                     routePoint = entry.getKey();
                 }
             }
-            Main.writeToFile("ROUTE : [" + entry.getKey().getX() + ", " + entry.getKey().getY() + "] WEIGHT: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor() + " AVAIL: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getAvailable());
+            Main.writeToFile("ROUTE : [" + entry.getKey().getX() + ", " + entry.getKey().getY() + "] WEIGHT: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor() + " AVAIL: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getAvailable() + " SCORE: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getScore() + " DEST: " + entry.getValue().contains(destination));
         }
 
         return routePoint;
@@ -303,15 +304,18 @@ public class Snake {
         BoardElement[][] room = roomObj.getRoom();
 
         int available = 0;
+        if (origin == null) {
+            routePoints.put(wP, new ArrayList<>());
+        }
+
         if (wP.getX() >= 0 && wP.getY() >= 0 && wP.getX() < roomObj.getWidth() && wP.getY() < roomObj.getHeight()) {
-            wP = setWeight(wP, roomObj, weightsMap, moveCount);
+            wP = calcWeight(wP, roomObj, weightsMap, moveCount);
             if (wP != null) {
-                available++;
+                if (weightsMap[wP.getX()][wP.getY()].getScore() >= 0)
+                    available++;
                 newWavePoints.put(wP, move);
                 if (origin == null) {
-                    List<BoardPoint> wPList = new ArrayList<>();
-                    wPList.add(wP);
-                    routePoints.put(wP, wPList);
+                    routePoints.get(wP).add(wP);
                 } else {
                     for (List<BoardPoint> origins : routePoints.values()) {
                         if (origins.contains(origin)) {
@@ -324,7 +328,7 @@ public class Snake {
         return available;
     }
 
-    private BoardPoint setWeight(BoardPoint wP, Room roomObj, Weight[][] weightMap, int moveCount) {
+    private BoardPoint calcWeight(BoardPoint wP, Room roomObj, Weight[][] weightMap, int moveCount) {
         BoardElement[][] room = roomObj.getRoom();
         if ((weightMap[wP.getX()][wP.getY()].getMoves() < 0 ||
                         weightMap[wP.getX()][wP.getY()].getMoves() > moveCount)) {
@@ -340,17 +344,19 @@ public class Snake {
             if (fury < moveCount && room[wP.getX()][wP.getY()].equals(BoardElement.STONE)) {
                 if (body.size() < 5) {
                     weightMap[wP.getX()][wP.getY()].setScore(WALL.getScore());
+                    return null;
                 } else {
                     weightMap[wP.getX()][wP.getY()].setScore(-STONE.getScore());
+                    return wP;
                 }
             } else if (fury >= moveCount && BoardElement.ENEMY_BODY.contains(room[wP.getX()][wP.getY()])) {
                 Snake enemy = roomObj.getEnemies().parallelStream()
                         .filter(snake -> snake.getBody().getFirst().equals(wP)).findFirst().orElse(null);
-                Main.writeToFile("ENEMY FURY [" + wP.getX() + ", " + wP.getY() + "] : " + (enemy == null ? "NULL" : enemy.getFury()));
                 if (enemy == null || enemy.getFury() == 0) {
                     weightMap[wP.getX()][wP.getY()].setScore(-ENEMY_HEAD_EVIL.getScore());
                 } else {
                     weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
+                    return null;
                 }
             } else if (!enemies.isEmpty()) {
                 enemies.forEach(enemy -> {
@@ -362,18 +368,26 @@ public class Snake {
                     } else {
                         weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
                     }
+                    Main.writeToFile("ENEMY [" + wP.getX() + ", " + wP.getY() + "] SCORE: " + weightMap[wP.getX()][wP.getY()].getScore());
                 });
+                if (weightMap[wP.getX()][wP.getY()].getScore() == ENEMY_HEAD_EVIL.getScore()) {
+                    return null;
+                }
             } else if (room[wP.getX()][wP.getY()].equals(FURY_PILL)) {
                 List<Integer> enemyDistance = roomObj.getEnemies().parallelStream().map(snake -> { return Math.abs(snake.getBody().getFirst().getX() - wP.getX()) + Math.abs(snake.getBody().getFirst().getY() - wP.getY()); }).collect(Collectors.toList());
                 enemyDistance.forEach( dst -> {
-                    if ((moveCount < dst) && (fury + 10 > dst / 2)) {
+                    if ((moveCount < dst) && (fury + FURY_TIME > dst / 2)) {
                         weightMap[wP.getX()][wP.getY()].setScore(FURY_PILL.getScore());
                     }
                 });
+            } else if (BoardElement.BODY.contains(room[wP.getX()][wP.getY()])) {
+                int cutSize = getBody().size() - getBody().indexOf(wP) - 1;
+                weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore() * cutSize);
             } else {
                 weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
             }
-            return wP;
+
+            return weightMap[wP.getX()][wP.getY()].getScore() < 0 ? null : wP;
         }
         return null;
     }

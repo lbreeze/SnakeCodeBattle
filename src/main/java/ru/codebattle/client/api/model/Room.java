@@ -72,13 +72,6 @@ public class Room {
         }
 
         if (head != null) {
-            Snake snake = new Snake();
-            snake.setBody(new LinkedList<>());
-            snake.addFirst(head);
-            snake.getBody().addAll(body);
-            if (tail != null)
-                snake.addLast(tail);
-
             switch (room[head.getX()][head.getY()]) {
                 case HEAD_DOWN:
                     Snake.LAST_MOVE = Direction.DOWN;
@@ -93,107 +86,15 @@ public class Room {
                     Snake.LAST_MOVE = Direction.RIGHT;
                     break;
             }
-            result.setSnake(snake);
+            result.setSnake(createSnake(tail, room));
 
-            Main.writeToFile("Enemies: " + enemies.size());
-            //enemies = new ArrayList<>();
-            for (BoardPoint tailPoint : enemies) {
-                snake = new Snake();
-                snake.setBody(new LinkedList<>());
-                if (result.getEnemies() == null) {
-                    result.setEnemies(new ArrayList<>());
-                }
-
-                BoardPoint point = BoardPoint.of(tailPoint);
-                BoardElement el = room[point.getX()][point.getY()];
-                snake.addFirst(point);
-                // System.out.println("Enemy part added: " + el.name());
-                Direction dir = null;
-                do {
-                    switch (el) {
-                        case ENEMY_TAIL_END_DOWN:
-                            point = point.shiftTop();
-                            dir = Direction.UP;
-                            break;
-                        case ENEMY_TAIL_END_UP:
-                            point = point.shiftBottom();
-                            dir = Direction.DOWN;
-                            break;
-                        case ENEMY_TAIL_END_LEFT:
-                            point = point.shiftRight();
-                            dir = Direction.RIGHT;
-                            break;
-                        case ENEMY_TAIL_END_RIGHT:
-                            point = point.shiftLeft();
-                            dir = Direction.LEFT;
-                            break;
-                        case ENEMY_BODY_HORIZONTAL:
-                            if (Direction.LEFT.equals(dir)) {
-                                point = point.shiftLeft();
-                            } else {
-                                point = point.shiftRight();
-                            }
-                            break;
-                        case ENEMY_BODY_VERTICAL:
-                            if (Direction.UP.equals(dir)) {
-                                point = point.shiftTop();
-                            } else {
-                                point = point.shiftBottom();
-                            }
-                            break;
-                        case ENEMY_BODY_LEFT_DOWN:
-                            if (Direction.UP.equals(dir)) {
-                                point = point.shiftLeft();
-                                dir = Direction.LEFT;
-                            } else {
-                                point = point.shiftBottom();
-                                dir = Direction.DOWN;
-                            }
-                            break;
-                        case ENEMY_BODY_LEFT_UP:
-                            if (Direction.DOWN.equals(dir)) {
-                                point = point.shiftLeft();
-                                dir = Direction.LEFT;
-                            } else {
-                                point = point.shiftTop();
-                                dir = Direction.UP;
-                            }
-                            break;
-                        case ENEMY_BODY_RIGHT_DOWN:
-                            if (Direction.UP.equals(dir)) {
-                                point = point.shiftRight();
-                                dir = Direction.RIGHT;
-                            } else {
-                                point = point.shiftBottom();
-                                dir = Direction.DOWN;
-                            }
-                            break;
-                        case ENEMY_BODY_RIGHT_UP:
-                            if (Direction.DOWN.equals(dir)) {
-                                point = point.shiftRight();
-                                dir = Direction.RIGHT;
-                            } else {
-                                point = point.shiftTop();
-                                dir = Direction.UP;
-                            }
-                            break;
-                        default:
-                            System.out.println("ERROR: this is not enemy: " + el.name());
-                            break;
-                    }
-
-                    el = room[point.getX()][point.getY()];
-                    if (!ENEMY.contains(el)) {
-
-                        break;
-                    }
-                    snake.addFirst(point);
-                    // System.out.println("Enemy part added: " + el.name());
-
-                } while (!BoardElement.ENEMY_HEAD.contains(el) || ENEMY_HEAD_DEAD.equals(el) || ENEMY_HEAD_SLEEP.equals(el));
-
-                result.getEnemies().add(snake);
+            if (result.getEnemies() == null) {
+                result.setEnemies(new ArrayList<>());
             }
+            for (BoardPoint tailPoint : enemies) {
+                result.getEnemies().add(createSnake(tailPoint, room));
+            }
+
         } else {
             //System.out.println("NEW ROUND!");
             Room.MOVE = 0;
@@ -205,6 +106,121 @@ public class Room {
         return result;
     }
 
+    private static Snake createSnake(BoardPoint tailPoint, BoardElement[][] room) {
+        Snake snake = new Snake();
+        snake.setBody(new LinkedList<>());
+
+        BoardPoint point = BoardPoint.of(tailPoint);
+        BoardElement el = room[point.getX()][point.getY()];
+        snake.addFirst(point);
+        // System.out.println("Enemy part added: " + el.name());
+        Direction dir = null;
+        do {
+            switch (el) {
+                case ENEMY_TAIL_END_DOWN:
+                case TAIL_END_DOWN:
+                    point = point.shiftTop();
+                    dir = Direction.UP;
+                    break;
+                case ENEMY_TAIL_END_UP:
+                case TAIL_END_UP:
+                    point = point.shiftBottom();
+                    dir = Direction.DOWN;
+                    break;
+                case ENEMY_TAIL_END_LEFT:
+                case TAIL_END_LEFT:
+                    point = point.shiftRight();
+                    dir = Direction.RIGHT;
+                    break;
+                case ENEMY_TAIL_END_RIGHT:
+                case TAIL_END_RIGHT:
+                    point = point.shiftLeft();
+                    dir = Direction.LEFT;
+                    break;
+                case ENEMY_BODY_HORIZONTAL:
+                case BODY_HORIZONTAL:
+                    if (Direction.LEFT.equals(dir)) {
+                        point = point.shiftLeft();
+                    } else {
+                        point = point.shiftRight();
+                    }
+                    break;
+                case ENEMY_BODY_VERTICAL:
+                case BODY_VERTICAL:
+                    if (Direction.UP.equals(dir)) {
+                        point = point.shiftTop();
+                    } else {
+                        point = point.shiftBottom();
+                    }
+                    break;
+                case ENEMY_BODY_LEFT_DOWN:
+                case BODY_LEFT_DOWN:
+                    if (Direction.UP.equals(dir)) {
+                        point = point.shiftLeft();
+                        dir = Direction.LEFT;
+                    } else {
+                        point = point.shiftBottom();
+                        dir = Direction.DOWN;
+                    }
+                    break;
+                case ENEMY_BODY_LEFT_UP:
+                case BODY_LEFT_UP:
+                    if (Direction.DOWN.equals(dir)) {
+                        point = point.shiftLeft();
+                        dir = Direction.LEFT;
+                    } else {
+                        point = point.shiftTop();
+                        dir = Direction.UP;
+                    }
+                    break;
+                case ENEMY_BODY_RIGHT_DOWN:
+                case BODY_RIGHT_DOWN:
+                    if (Direction.UP.equals(dir)) {
+                        point = point.shiftRight();
+                        dir = Direction.RIGHT;
+                    } else {
+                        point = point.shiftBottom();
+                        dir = Direction.DOWN;
+                    }
+                    break;
+                case ENEMY_BODY_RIGHT_UP:
+                case BODY_RIGHT_UP:
+                    if (Direction.DOWN.equals(dir)) {
+                        point = point.shiftRight();
+                        dir = Direction.RIGHT;
+                    } else {
+                        point = point.shiftTop();
+                        dir = Direction.UP;
+                    }
+                    break;
+                default:
+                    if (!HEAD.contains(el) && !ENEMY_HEAD.contains(el)) {
+                        System.out.println("ERROR: this is not snake: " + el.name());
+                    }
+                    break;
+            }
+
+            el = room[point.getX()][point.getY()];
+            if (!ENEMY.contains(el) && !TAIL.contains(el) && !BODY.contains(el) && !HEAD.contains(el)) {
+
+                break;
+            }
+            snake.addFirst(point);
+
+        } while (!(BoardElement.ENEMY_HEAD.contains(el) || BoardElement.HEAD.contains(el))
+                || ENEMY_HEAD_DEAD.equals(el)
+                || ENEMY_HEAD_SLEEP.equals(el)
+                || HEAD_DEAD.equals(el) || HEAD_SLEEP.equals(el));
+
+        StringBuilder snakeStr = new StringBuilder();
+        snake.getBody().forEach(pt -> {
+            snakeStr.append(pt.toString());
+        });
+        Main.writeToFile("SNAKE: " + snakeStr.toString());
+
+        return snake;
+    }
+
     public void mergeInfo(Room previousRoom) {
         Snake prevSnake = previousRoom.getSnake();
         if (prevSnake != null) {
@@ -213,15 +229,18 @@ public class Room {
         }
 
         List<Snake> prevEnemies = previousRoom.getEnemies();
+        Main.writeToFile("ENEMIES: " + enemies.size());
         enemies.parallelStream().forEach(enemy -> {
             prevEnemies.parallelStream()
                     .filter(prevEnemy -> prevEnemy.getBody().contains(enemy.getBody().getLast()))
                     .findFirst()
                     .ifPresent(prev -> {
                         if (previousRoom.getRoom()[enemy.getBody().getFirst().getX()][enemy.getBody().getFirst().getY()].equals(FURY_PILL)) {
-                            enemy.setFury(enemy.getFury() + 10);
+                            prev.setFury(prev.getFury() + Snake.FURY_TIME);
                         }
                         enemy.setFury(prev.getFury() == 0 ? 0 : prev.getFury() - 1);
+
+                        Main.writeToFile("ENEMY [" + enemy.getBody().getFirst().getX() + ", " + enemy.getBody().getFirst().getY() + "] FURY: " + enemy.getFury());
                     });
         });
     }

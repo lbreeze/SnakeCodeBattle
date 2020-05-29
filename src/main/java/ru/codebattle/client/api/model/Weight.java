@@ -26,6 +26,7 @@ public class Weight {
     private int enemyProximity = 0;
 
     public double getFactor() {
-        return (double) (score * Math.pow(available, 0.2)) / Math.pow(moves, 3); // * Math.pow(connected, 0.1)
+        return (double) (available == 0 ? -300 : score) / Math.pow(moves, 3); // * Math.pow(connected, 0.1)
     }
+
 }
