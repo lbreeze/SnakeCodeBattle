@@ -27,7 +27,7 @@ public class Weight {
                 score + (
                         (connected < snakeLen) ? -10 * (snakeLen - connected) : 0
                 )  - (
-                        enemyProximity >= snakeLen/2 ? 0 : 50 * (snakeLen/2 - enemyProximity) // default length/2 = 4
+                        enemyProximity >= snakeLen/2 ? 0 : 50/enemyProximity // default length/2 = 4
                 )
         ) / moves;
     }

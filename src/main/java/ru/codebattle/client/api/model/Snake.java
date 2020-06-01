@@ -81,6 +81,8 @@ public class Snake {
     public SnakeAction moveDecision(Room room) {
         //System.out.println(lastMove.name() + " " +  room.getRoom()[body.getFirst().getX()][body.getFirst().getY()].name());
 
+        peace();
+
         Direction result = lastMove;
 
         BoardPoint routePoint = findDestinationRoute(body.getFirst(), room);
@@ -140,8 +142,6 @@ public class Snake {
             fury();
         }
 
-        peace();
-
         //if (room.getEnemies().size() == 1 && fury == 0) {
         //if (getBody().size() > room.getEnemies().get(0).getBody().size() + 2 && room.getEnemies().get(0).getFury() == 0) {
         //BoardElement.EAGER_TYPES.addAll(ENEMY_HEAD);
@@ -194,9 +194,7 @@ public class Snake {
                     if (enemy.getWeightsMap()[col][row] != null) {
                         int proximity = enemy.getWeightsMap()[col][row].getMoves();
                         //Math.abs(weightsMap[enemy.getBody().getFirst().getX()][enemy.getBody().getFirst().getY()].getMoves() - weightsMap[col][row].getMoves());
-                        boolean canEat = (((fury >= weightsMap[col][row].getMoves()) || (body.size() >= enemy.getBody().size() + 2))
-                                && (enemy.getFury() == 0)) ||
-                                ((fury >= weightsMap[col][row].getMoves()) && (body.size() >= enemy.getBody().size() + 2));
+                        boolean canEat = (fury >= weightsMap[col][row].getMoves()) && ((body.size() >= enemy.getBody().size() + 2) || (enemy.getFury() == 0));
                         if ((weightsMap[col][row].getEnemyProximity() > proximity) && !canEat) {
                             weightsMap[col][row].setEnemyProximity(proximity);
                         }
@@ -341,12 +339,15 @@ public class Snake {
                     routePoint = entry.getKey();
                 }
             }
-
-            Main.writeToFile("ROUTE", entry.getKey().toString() + " WEIGHT: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor(getBody().size())
-                    + " PROX: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getEnemyProximity()
-                    + " CONN: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getConnected()
-                    + " SCORE: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getScore()
-                    + " DEST: " + entry.getValue().contains(destination));
+            try {
+                Main.writeToFile("ROUTE", entry.getKey().toString() + " WEIGHT: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor(getBody().size())
+                        + " PROX: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getEnemyProximity()
+                        + " CONN: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getConnected()
+                        + " SCORE: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getScore()
+                        + " DEST: " + entry.getValue().contains(destination));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         if (routePoint == null) {
@@ -425,18 +426,15 @@ public class Snake {
                             return null;
                         }
                     }
-                } else if (targetEnemy != null) {
-                    boolean canEat = (((fury >= moveCount) || (body.size() >= targetEnemy.getBody().size() + 2))
-                            && (targetEnemy.getFury() == 0))
-                            || ((fury >= moveCount) && (body.size() >= targetEnemy.getBody().size() + 2));
-                    if (canEat && (targetEnemy.getBody().contains(wP) || weightMap[wP.getX()][wP.getY()].getScore() > 0)) {
-                        weightMap[wP.getX()][wP.getY()].setScore(-ENEMY_HEAD_EVIL.getScore());
+                } else if (BoardElement.ENEMY_TAIL.contains(room[wP.getX()][wP.getY()])) {
+                    if (fury >= moveCount) {
+                        weightMap[wP.getX()][wP.getY()].setScore(1);
+
                     } else {
-                        weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
-                        return null;
+                        weightMap[wP.getX()][wP.getY()].setScore(-1);
                     }
                 } else if (BoardElement.ENEMY_BODY.contains(room[wP.getX()][wP.getY()])) {
-                    if (fury >= 2 * moveCount) {
+                    if (fury >= moveCount) {
                         Snake snake = roomObj.getEnemies().parallelStream().filter(enemy -> enemy.getBody().contains(wP)).findFirst().orElse(null);
                         if (snake != null)
                             weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore() * snake.getBody().size() - snake.getBody().indexOf(wP) - 1);
@@ -444,6 +442,18 @@ public class Snake {
                             Main.writeToFile("ENEMY", wP.toString() + " not found in enemy body.");
                     } else {
                         weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
+                    }
+                } else if (targetEnemy != null) {
+                    boolean canEat = (fury >= moveCount) && ((body.size() >= targetEnemy.getBody().size() + 2) || (targetEnemy.getFury() == 0));
+                    if (canEat) {
+                        if (targetEnemy.getBody().getFirst().equals(wP)) {
+                            weightMap[wP.getX()][wP.getY()].setScore(30 * targetEnemy.getBody().size());
+                        } else {
+                            weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
+                        }
+                    } else {
+                        weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
+                        return null;
                     }
 /*
             } else if (room[wP.getX()][wP.getY()].equals(FURY_PILL)) {
