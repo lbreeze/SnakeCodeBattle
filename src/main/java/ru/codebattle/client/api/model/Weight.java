@@ -15,18 +15,21 @@ public class Weight {
 
     @Getter
     @Setter
-    private int available = 0;
-
-    @Getter
-    @Setter
     private int connected = 0;
 
+    // todo unused
     @Getter
     @Setter
-    private int enemyProximity = 0;
+    private int enemyProximity = Integer.MAX_VALUE;
 
-    public double getFactor() {
-        return (double) (available == 0 ? -300 : score) / Math.pow(moves, 3); // * Math.pow(connected, 0.1)
+    public double getFactor(int snakeLen) {
+        return (double) (
+                score + (
+                        (connected < snakeLen) ? -10 * (snakeLen - connected) : 0
+                )  - (
+                        enemyProximity >= snakeLen/2 ? 0 : 50 * (snakeLen/2 - enemyProximity) // default length/2 = 4
+                )
+        ) / moves;
     }
 
 }

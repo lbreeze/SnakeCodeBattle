@@ -27,44 +27,52 @@ public class Main {
         while (true) {
 
             client.run(gameBoard -> {
-                Room room = Room.createFromBoard(gameBoard);
-                if (room.getSnake() != null) {
-                    try {
-                        if (fileWriter == null) {
-                            String gameFile = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
-                            System.out.println(gameFile);
-                            File f = new File(gameFile + ".log");
-                            f.createNewFile();
-                            fileWriter = new FileWriter(f, StandardCharsets.UTF_8);
-                        }
-
-                        gameBoard.printBoard(fileWriter);
-                        fileWriter.write("MOVE: " + Room.MOVE++ + "\n");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (previousRoom != null) {
-                        room.mergeInfo(previousRoom);
-                    }
-                    previousRoom = room;
-
-                    SnakeAction result = room.moveDecision();
-                    return result;
-                } else {
-                    if (fileWriter != null) {
+                try {
+                    long time = System.currentTimeMillis();
+                    Room room = Room.createFromBoard(gameBoard);
+                    if (room.getSnake() != null) {
                         try {
-                            fileWriter.flush();
-                            fileWriter.close();
+                            if (fileWriter == null) {
+                                String gameFile = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
+                                System.out.println(gameFile);
+                                File f = new File(gameFile + ".log");
+                                f.createNewFile();
+                                fileWriter = new FileWriter(f, StandardCharsets.UTF_8);
+                            }
+
+                            gameBoard.printBoard(fileWriter);
+                            fileWriter.write("MOVE: " + Room.MOVE++ + "\n");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+
+                        if (previousRoom != null) {
+                            room.mergeInfo(previousRoom);
+                        }
+                        previousRoom = room;
+
+                        SnakeAction result = room.moveDecision();
+                        if (System.currentTimeMillis() - time > 200)
+                            System.out.println(System.currentTimeMillis() - time + "ms");
+                        return result;
+                    } else {
+                        if (fileWriter != null) {
+                            try {
+                                fileWriter.flush();
+                                fileWriter.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        fileWriter = null;
+                        Room.MOVE = 0;
+                        Room.SCORE = 0;
+                        previousRoom = null;
+                        return new SnakeAction(false, Direction.values()[new Double(Math.random() * 4).intValue()]);
                     }
-                    fileWriter = null;
-                    Room.MOVE = 0;
-                    Room.SCORE = 0;
-                    previousRoom = null;
-                    return new SnakeAction(false, Direction.values()[new Double(Math.random() * 4).intValue()]);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
                 }
             });
 
@@ -82,10 +90,10 @@ public class Main {
         //client.initiateExit();
     }
 
-    public static void writeToFile(String string) {
+    public static void writeToFile(String cat, String string) {
         if (fileWriter != null) {
             try {
-                fileWriter.write(string + "\n");
+                fileWriter.write(cat + ": "+ string + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }

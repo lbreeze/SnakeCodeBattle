@@ -15,10 +15,10 @@ public enum BoardElement {
     START_FLOOR('#', -400),  // место старта змей
     OTHER('?', 0),        // этого ты никогда не увидишь :)
 
-    APPLE('○', 15),        // яблоки надо кушать от них становишься длинее
-    STONE('●', 10),        // а это кушать не стоит - от этого укорачиваешься
+    APPLE('○', 30),        // яблоки надо кушать от них становишься длинее
+    STONE('●', -30),        // а это кушать не стоит - от этого укорачиваешься
     FLYING_PILL('©', 0),  // таблетка полета - дает суперсилы
-    FURY_PILL('®', 20),    // таблетка ярости - дает суперсилы
+    FURY_PILL('®', 30),    // таблетка ярости - дает суперсилы
     GOLD('$', 10),         // золото - просто очки
 
     // голова твоей змеи в разных состояниях и напрвлениях
@@ -47,39 +47,40 @@ public enum BoardElement {
     BODY_RIGHT_UP('╚', -10),
 
     // змейки противников
-    ENEMY_HEAD_DOWN('˅', 100),
-    ENEMY_HEAD_LEFT('<', 100),
-    ENEMY_HEAD_RIGHT('>', 100),
-    ENEMY_HEAD_UP('˄', 100),
+    ENEMY_HEAD_DOWN('˅', 200),
+    ENEMY_HEAD_LEFT('<', 200),
+    ENEMY_HEAD_RIGHT('>', 200),
+    ENEMY_HEAD_UP('˄', 200),
     ENEMY_HEAD_DEAD('☺', 0),   // этот раунд противник проиграл
-    ENEMY_HEAD_EVIL('♣', -400),   // противник скушал таблетку ярости
+    ENEMY_HEAD_EVIL('♣', -200),   // противник скушал таблетку ярости
     ENEMY_HEAD_FLY('♦', 0),    // противник скушал таблетку полета
     ENEMY_HEAD_SLEEP('ø', 0),  // змейка противника ожидает начала раунда
 
     // хвосты змеек противников
-    ENEMY_TAIL_END_DOWN('¤', -10),
-    ENEMY_TAIL_END_LEFT('×', -10),
-    ENEMY_TAIL_END_UP('æ', -10),
-    ENEMY_TAIL_END_RIGHT('ö', -10),
+    ENEMY_TAIL_END_DOWN('¤', 1),
+    ENEMY_TAIL_END_LEFT('×', 1),
+    ENEMY_TAIL_END_UP('æ', 1),
+    ENEMY_TAIL_END_RIGHT('ö', 1),
     ENEMY_TAIL_INACTIVE('*', 0),
 
     // туловище змеек противников
-    ENEMY_BODY_HORIZONTAL('─', -50),
-    ENEMY_BODY_VERTICAL('│', -50),
-    ENEMY_BODY_LEFT_DOWN('┐', -50),
-    ENEMY_BODY_LEFT_UP('┘', -50),
-    ENEMY_BODY_RIGHT_DOWN('┌', -50),
-    ENEMY_BODY_RIGHT_UP('└', -50);
+    ENEMY_BODY_HORIZONTAL('─', 30),
+    ENEMY_BODY_VERTICAL('│', 30),
+    ENEMY_BODY_LEFT_DOWN('┐', 30),
+    ENEMY_BODY_LEFT_UP('┘', 30),
+    ENEMY_BODY_RIGHT_DOWN('┌', 30),
+    ENEMY_BODY_RIGHT_UP('└', 30);
 
     final char symbol;
     final int score;
 
-    public static final Set<BoardElement> EAGER_TYPES = new HashSet<>(Arrays.asList(APPLE, GOLD, FURY_PILL, FLYING_PILL));
+    //public static final Set<BoardElement> EAGER_TYPES = new HashSet<>(Arrays.asList(APPLE, GOLD, FURY_PILL, FLYING_PILL));
 
     public static final Set<BoardElement> HEAD = new HashSet<>(Arrays.asList(HEAD_DOWN,
             HEAD_LEFT,
             HEAD_RIGHT,
             HEAD_UP,
+            HEAD_DEAD,
             HEAD_EVIL,    // ты скушал таблетку ярости
             HEAD_FLY     // ты скушал таблетку полета
             ));
