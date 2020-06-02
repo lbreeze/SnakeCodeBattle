@@ -214,8 +214,7 @@ public class Snake {
                         weightsMap[col][row].getScore() > 1 && weightsMap[col][row].getMoves() > 0 && weightsMap[col][row].getFactor(getBody().size()) > 0) {
                     if (destination == null) {
                         Main.writeToFile("WEIGHT", room[col][row].name() + " [" + col + ", " + row + "] = " + weightsMap[col][row].getFactor(getBody().size())
-                                + " PROX: " + weightsMap[col][row].getEnemyProximity()
-                                + " CONN: " + weightsMap[col][row].getConnected());
+                                + weightsMap[col][row].toString());
                         destination = BoardPoint.of(col, row);
                     } else {
                         if (weightsMap[col][row].getFactor(getBody().size()) > weightsMap[destination.getX()][destination.getY()].getFactor(getBody().size())) {
@@ -223,8 +222,7 @@ public class Snake {
                         }
 
                         Main.writeToFile("WEIGHT", room[col][row].name() + " [" + col + ", " + row + "] = " + weightsMap[col][row].getFactor(getBody().size())
-                                + " PROX: " + weightsMap[col][row].getEnemyProximity()
-                                + " CONN: " + weightsMap[col][row].getConnected());
+                                + weightsMap[col][row].toString());
 /*
                         if (weightsMap[x][y].getMoves() < weightsMap[destination[0]][destination[1]].getMoves()) {
                             destination = new int[] {x, y };
@@ -242,8 +240,7 @@ public class Snake {
             for (BoardPoint bp : routePoints.keySet()) {
                 if (destination == null || weightsMap[bp.getX()][bp.getY()].getFactor(getBody().size()) > weightsMap[destination.getX()][destination.getY()].getFactor(getBody().size())) {
                     Main.writeToFile("WEIGHT", room[bp.getX()][bp.getY()].name() + " " + bp.toString() + " = " + weightsMap[bp.getX()][bp.getY()].getFactor(getBody().size())
-                            + " PROX: " + weightsMap[bp.getX()][bp.getY()].getEnemyProximity()
-                            + " CONN: " + weightsMap[bp.getX()][bp.getY()].getConnected());
+                            + weightsMap[bp.getX()][bp.getY()].toString());
                     destination = BoardPoint.of(bp);
                 }
             }
@@ -251,8 +248,7 @@ public class Snake {
                 BoardPoint bp = BoardPoint.of(src.getX() - 1, src.getY());
                 if (destination == null || weightsMap[bp.getX()][bp.getY()].getFactor(getBody().size()) > weightsMap[destination.getX()][destination.getY()].getFactor(getBody().size())) {
                     Main.writeToFile("WEIGHT", room[bp.getX()][bp.getY()].name() + " " + bp.toString() + " = " + weightsMap[bp.getX()][bp.getY()].getFactor(getBody().size())
-                            + " PROX: " + weightsMap[bp.getX()][bp.getY()].getEnemyProximity()
-                            + " CONN: " + weightsMap[bp.getX()][bp.getY()].getConnected());
+                            + weightsMap[bp.getX()][bp.getY()].toString());
                     destination = bp;
                 }
             }
@@ -350,9 +346,7 @@ public class Snake {
             }
             try {
                 Main.writeToFile("ROUTE", entry.getKey().toString() + " WEIGHT: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getFactor(getBody().size())
-                        + " PROX: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getEnemyProximity()
-                        + " CONN: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getConnected()
-                        + " SCORE: " + weightsMap[entry.getKey().getX()][entry.getKey().getY()].getScore()
+                        + weightsMap[entry.getKey().getX()][entry.getKey().getY()].toString()
                         + " DEST: " + entry.getValue().contains(destination));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -502,8 +496,10 @@ public class Snake {
                     return snake.getWeightsMap()[wP.getX()][wP.getY()].getMoves();
                 }).collect(Collectors.toList());
                 enemyDistance.forEach(dst -> {
-                    if (moveCount <= dst) {//((moveCount < dst) && (fury + FURY_TIME > dst / 2)) {
+                    if ((moveCount <= dst) && (fury < 2 * dst) && (fury + FURY_TIME >= dst / 2)) {
                         weightMap[wP.getX()][wP.getY()].setScore(FURY_PILL.getScore());
+                    } else {
+                        weightMap[wP.getX()][wP.getY()].setScore(1);
                     }
                 });
                 } else if (BoardElement.BODY.contains(room[wP.getX()][wP.getY()])) {

@@ -32,4 +32,13 @@ public class Weight {
         ) / moves;
     }
 
+    @Override
+    public String toString() {
+        return
+                ", MOVES=" + moves +
+                ", SCORE=" + score +
+                ", CONN=" + connected +
+                ", PROX=" + enemyProximity
+                ;
+    }
 }
