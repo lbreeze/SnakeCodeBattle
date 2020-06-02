@@ -16,7 +16,7 @@ import java.util.Date;
 
 public class Main {
 
-    private static final String SERVER_ADDRESS = "http://codebattle-pro-2020s1.westeurope.cloudapp.azure.com/codenjoy-contest/board/player/eyme51gkgalf6j9g5oyu?code=2101988243209930963&gameName=snakebattle";
+    private static final String SERVER_ADDRESS = "";
 
     private static FileWriter fileWriter = null;
 
