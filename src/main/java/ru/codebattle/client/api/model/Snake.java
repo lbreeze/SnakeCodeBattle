@@ -450,9 +450,9 @@ public class Snake {
                         weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
                     }
                 } else if (targetEnemy != null) {
+                    boolean canEat = (((fury >= moveCount) || (body.size() >= targetEnemy.getBody().size() + 2)) && (targetEnemy.getFury() == 0))
+                            || ((fury >= moveCount) && (body.size() >= targetEnemy.getBody().size() + 2));
                     if (targetEnemy.getBody().getFirst().equals(wP)) {
-                        boolean canEat = (((fury >= moveCount) || (body.size() >= targetEnemy.getBody().size() + 2)) && (targetEnemy.getFury() == 0))
-                        || ((fury >= moveCount) && (body.size() >= targetEnemy.getBody().size() + 2));
                         if (canEat) {
                             weightMap[wP.getX()][wP.getY()].setScore(30 * targetEnemy.getBody().size());
                             weightMap[wP.getX()][wP.getY()].setConnected(getBody().size()); // ignore closed area, always have exit as enemy has and i have an enter
@@ -461,7 +461,7 @@ public class Snake {
                             return null;
                         }
                     } else {
-                        boolean canEat = (fury >= moveCount) && ((body.size() >= targetEnemy.getBody().size() + 2) || (targetEnemy.getFury() == 0));
+                        //boolean canEat = (fury >= moveCount) && ((body.size() >= targetEnemy.getBody().size() + 2) || (targetEnemy.getFury() == 0));
                         if (canEat) {
                             if (weightMap[wP.getX()][wP.getY()].getScore() >= -1) {
                                 weightMap[wP.getX()][wP.getY()].setScore(10 * targetEnemy.getBody().size());
