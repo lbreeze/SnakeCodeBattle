@@ -496,12 +496,23 @@ public class Snake {
                     return snake.getWeightsMap()[wP.getX()][wP.getY()].getMoves();
                 }).collect(Collectors.toList());
                 enemyDistance.forEach(dst -> {
-                    if ((moveCount <= dst) && (fury < 2 * dst) && (fury + FURY_TIME >= dst / 2)) {
-                        weightMap[wP.getX()][wP.getY()].setScore(FURY_PILL.getScore());
+                    if ((moveCount <= dst) && (fury < dst)) {//&& (fury + FURY_TIME >= dst / 2)) {
+                        weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
                     } else {
                         weightMap[wP.getX()][wP.getY()].setScore(1);
                     }
                 });
+                } else if (room[wP.getX()][wP.getY()].equals(APPLE)) {
+                    List<Integer> enemyDistance = roomObj.getEnemies().parallelStream().map(snake -> {
+                        return snake.getWeightsMap()[wP.getX()][wP.getY()].getMoves();
+                    }).collect(Collectors.toList());
+                    enemyDistance.forEach(dst -> {
+                        if ((moveCount <= dst)) {
+                            weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
+                        } else {
+                            weightMap[wP.getX()][wP.getY()].setScore(1);
+                        }
+                    });
                 } else if (BoardElement.BODY.contains(room[wP.getX()][wP.getY()])) {
                     int cutSize = getBody().size() - getBody().indexOf(wP) - 1;
                     weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore() * cutSize);
