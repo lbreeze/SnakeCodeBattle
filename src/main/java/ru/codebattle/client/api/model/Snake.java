@@ -80,80 +80,83 @@ public class Snake {
     }
 
     public SnakeAction moveDecision(Room room) {
-        //System.out.println(lastMove.name() + " " +  room.getRoom()[body.getFirst().getX()][body.getFirst().getY()].name());
-
-        peace();
-
         Direction result = lastMove;
-
-        BoardPoint routePoint = findDestinationRoute(body.getFirst(), room);
-
-        if (routePoint != null) {
-            if (routePoint.getX() == body.getFirst().getX() && routePoint.getY() == body.getFirst().getY() + 1) {
-                result = Direction.DOWN;
-            }
-
-            if (routePoint.getX() == body.getFirst().getX() && routePoint.getY() == body.getFirst().getY() - 1) {
-                result = Direction.UP;
-            }
-
-            if (routePoint.getX() == body.getFirst().getX() - 1 && routePoint.getY() == body.getFirst().getY()) {
-                result = Direction.LEFT;
-            }
-
-            if (routePoint.getX() == body.getFirst().getX() + 1 && routePoint.getY() == body.getFirst().getY()) {
-                result = Direction.RIGHT;
-            }
-
-            if (room.getRoom()[routePoint.getX()][routePoint.getY()] == BoardElement.STONE) {
-                eatStone();
-            }
-        }
-
         boolean act = false;//fury >= weightsMap[getBody().getLast().getX()][getBody().getLast().getY()].getMoves() && stones > 0;
 
-        BoardPoint tailPoint = getBody().getLast();
-        if (stones > 0 && (BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX() - 1][tailPoint.getY()]) ||
-                BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX() + 1][tailPoint.getY()]) ||
-                BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() - 1]) ||
-                BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() + 1]))) {
-            switch (lastMove) {
-                case LEFT:
-                    act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX() - 1][tailPoint.getY()]);
-                    break;
-                case RIGHT:
-                    act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX() + 1][tailPoint.getY()]);
-                    break;
-                case UP:
-                    act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() - 1]);
-                    break;
-                case DOWN:
-                    act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() + 1]);
-                    break;
+        //System.out.println(lastMove.name() + " " +  room.getRoom()[body.getFirst().getX()][body.getFirst().getY()].name());
+        try {
+            peace();
+
+
+            BoardPoint routePoint = findDestinationRoute(body.getFirst(), room);
+
+            if (routePoint != null) {
+                if (routePoint.getX() == body.getFirst().getX() && routePoint.getY() == body.getFirst().getY() + 1) {
+                    result = Direction.DOWN;
+                }
+
+                if (routePoint.getX() == body.getFirst().getX() && routePoint.getY() == body.getFirst().getY() - 1) {
+                    result = Direction.UP;
+                }
+
+                if (routePoint.getX() == body.getFirst().getX() - 1 && routePoint.getY() == body.getFirst().getY()) {
+                    result = Direction.LEFT;
+                }
+
+                if (routePoint.getX() == body.getFirst().getX() + 1 && routePoint.getY() == body.getFirst().getY()) {
+                    result = Direction.RIGHT;
+                }
+
+                if (room.getRoom()[routePoint.getX()][routePoint.getY()] == BoardElement.STONE) {
+                    eatStone();
+                }
             }
 
+            BoardPoint tailPoint = getBody().getLast();
+            if (stones > 0 && (BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX() - 1][tailPoint.getY()]) ||
+                    BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX() + 1][tailPoint.getY()]) ||
+                    BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() - 1]) ||
+                    BoardElement.ENEMY_HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() + 1]))) {
+                switch (lastMove) {
+                    case LEFT:
+                        act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX() - 1][tailPoint.getY()]);
+                        break;
+                    case RIGHT:
+                        act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX() + 1][tailPoint.getY()]);
+                        break;
+                    case UP:
+                        act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() - 1]);
+                        break;
+                    case DOWN:
+                        act = !BoardElement.HEAD.contains(room.getRoom()[tailPoint.getX()][tailPoint.getY() + 1]);
+                        break;
+                }
 
+
+            }
+
+            if (act && stones > 0)
+                stones--;
+
+            if (routePoint != null && room.getRoom()[routePoint.getX()][routePoint.getY()] == BoardElement.FURY_PILL) {
+                fury += FURY_TIME;
+                fury();
+            }
+
+            //if (room.getEnemies().size() == 1 && fury == 0) {
+            //if (getBody().size() > room.getEnemies().get(0).getBody().size() + 2 && room.getEnemies().get(0).getFury() == 0) {
+            //BoardElement.EAGER_TYPES.addAll(ENEMY_HEAD);
+            //} else {
+            //BoardElement.EAGER_TYPES.removeAll(ENEMY_HEAD);
+            //}
+            //}
+
+            lastMove = result;
+
+            Main.writeToFile("ACTION", "FROM [" + body.getFirst().getX() + ", " + body.getFirst().getY() + "] -> " + new SnakeAction(act, result) + " -> [" + destination.getX() + ", " + destination.getY() + "] FURY:" + fury);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        if (act && stones > 0)
-            stones--;
-
-        if (routePoint != null && room.getRoom()[routePoint.getX()][routePoint.getY()] == BoardElement.FURY_PILL) {
-            fury += FURY_TIME;
-            fury();
-        }
-
-        //if (room.getEnemies().size() == 1 && fury == 0) {
-        //if (getBody().size() > room.getEnemies().get(0).getBody().size() + 2 && room.getEnemies().get(0).getFury() == 0) {
-        //BoardElement.EAGER_TYPES.addAll(ENEMY_HEAD);
-        //} else {
-        //BoardElement.EAGER_TYPES.removeAll(ENEMY_HEAD);
-        //}
-        //}
-
-        lastMove = result;
-
-        Main.writeToFile("ACTION", "FROM [" + body.getFirst().getX() + ", " + body.getFirst().getY() + "] -> " + new SnakeAction(act, result) + " -> [" + destination.getX() + ", " + destination.getY() + "] FURY:" + fury);
         return new SnakeAction(act, result);
     }
 
