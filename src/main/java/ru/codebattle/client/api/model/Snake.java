@@ -371,11 +371,11 @@ public class Snake {
     }
 
     private void calcNewWavePoint(BoardPoint wP, Room roomObj, Map<BoardPoint, Direction> newWavePoints, int moveCount, Direction move, Map<BoardPoint, List<BoardPoint>> routePoints, BoardPoint origin, boolean movesOnly) {
-        if (origin == null) {
-            routePoints.put(wP, new ArrayList<>());
-        }
+        if ((wP.getX() >= 0) && (wP.getY() >= 0) && (wP.getX() < roomObj.getWidth()) && (wP.getY() < roomObj.getHeight())) {
+            if (origin == null) {
+                routePoints.put(wP, new ArrayList<>());
+            }
 
-        if (wP.getX() >= 0 && wP.getY() >= 0 && wP.getX() < roomObj.getWidth() && wP.getY() < roomObj.getHeight()) {
             wP = calcWeight(wP, roomObj, weightsMap, moveCount, movesOnly);
             if (wP != null) {
                 newWavePoints.put(wP, move);
