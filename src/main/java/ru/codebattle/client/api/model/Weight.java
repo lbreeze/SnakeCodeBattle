@@ -27,7 +27,7 @@ public class Weight {
                 score + (
                         (connected < snakeLen) ? -30 * (snakeLen - connected) : 0
                 )  - (
-                        enemyProximity == 0 || enemyProximity >= 4 ? 0 : 100/Math.sqrt(enemyProximity)
+                        enemyProximity <= 0 || enemyProximity >= 4 ? 0 : 100/Math.sqrt(enemyProximity)
                 )
         ) / moves;
     }
