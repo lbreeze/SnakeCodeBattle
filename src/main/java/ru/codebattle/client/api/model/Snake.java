@@ -497,7 +497,7 @@ public class Snake {
                 }).collect(Collectors.toList());
                 enemyDistance.forEach(dst -> {
                     if ((moveCount <= dst) && (fury < dst)) {//&& (fury + FURY_TIME >= dst / 2)) {
-                        weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
+                        weightMap[wP.getX()][wP.getY()].setScore(FURY_PILL.getScore());
                     } else {
                         weightMap[wP.getX()][wP.getY()].setScore(1);
                     }
@@ -508,7 +508,7 @@ public class Snake {
                     }).collect(Collectors.toList());
                     enemyDistance.forEach(dst -> {
                         if ((moveCount <= dst)) {
-                            weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
+                            weightMap[wP.getX()][wP.getY()].setScore(APPLE.getScore());
                         } else {
                             weightMap[wP.getX()][wP.getY()].setScore(1);
                         }
