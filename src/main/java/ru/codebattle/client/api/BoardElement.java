@@ -64,12 +64,12 @@ public enum BoardElement {
     ENEMY_TAIL_INACTIVE('*', 0),
 
     // туловище змеек противников
-    ENEMY_BODY_HORIZONTAL('─', 50),
-    ENEMY_BODY_VERTICAL('│', 50),
-    ENEMY_BODY_LEFT_DOWN('┐', 50),
-    ENEMY_BODY_LEFT_UP('┘', 50),
-    ENEMY_BODY_RIGHT_DOWN('┌', 50),
-    ENEMY_BODY_RIGHT_UP('└', 50);
+    ENEMY_BODY_HORIZONTAL('─', 30),
+    ENEMY_BODY_VERTICAL('│', 30),
+    ENEMY_BODY_LEFT_DOWN('┐', 30),
+    ENEMY_BODY_LEFT_UP('┘', 30),
+    ENEMY_BODY_RIGHT_DOWN('┌', 30),
+    ENEMY_BODY_RIGHT_UP('└', 30);
 
     final char symbol;
     final int score;

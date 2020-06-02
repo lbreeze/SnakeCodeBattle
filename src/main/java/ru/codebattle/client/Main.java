@@ -16,19 +16,25 @@ import java.util.Date;
 
 public class Main {
 
-    private static final String SERVER_ADDRESS = "http://codebattle-pro-2020s1.westeurope.cloudapp.azure.com/codenjoy-contest/board/player/wus1ggiwdddwopmlj5zb?code=5908849919158231956&gameName=snakebattle";
+    private static final String SERVER_ADDRESS = "http://codebattle-pro-2020s1.westeurope.cloudapp.azure.com/codenjoy-contest/board/player/eyme51gkgalf6j9g5oyu?code=2101988243209930963&gameName=snakebattle";
 
     private static FileWriter fileWriter = null;
 
     private static Room previousRoom = null;
+
+    private static long lastFrameTime = 0;
 
     public static void main(String[] args) throws URISyntaxException, IOException {
         SnakeBattleClient client = new SnakeBattleClient(SERVER_ADDRESS);
         while (true) {
 
             client.run(gameBoard -> {
+                long time = System.currentTimeMillis();
+                if ((lastFrameTime != 0) && ((time - lastFrameTime >= 1100) || (time - lastFrameTime <= 900))) {
+                    System.out.println("Frame delay at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(time)) +": " + (time - lastFrameTime) + "ms");
+                }
+                lastFrameTime = time;
                 try {
-                    long time = System.currentTimeMillis();
                     Room room = Room.createFromBoard(gameBoard);
                     if (room.getSnake() != null) {
                         try {
@@ -53,7 +59,7 @@ public class Main {
 
                         SnakeAction result = room.moveDecision();
                         if (System.currentTimeMillis() - time > 200)
-                            System.out.println(System.currentTimeMillis() - time + "ms");
+                            System.out.println("Processing time: " + (System.currentTimeMillis() - time) + "ms");
                         return result;
                     } else {
                         if (fileWriter != null) {

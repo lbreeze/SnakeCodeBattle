@@ -25,9 +25,9 @@ public class Weight {
     public double getFactor(int snakeLen) {
         return (double) (
                 score + (
-                        (connected < snakeLen) ? -10 * (snakeLen - connected) : 0
+                        (connected < snakeLen) ? -30 * (snakeLen - connected) : 0
                 )  - (
-                        enemyProximity >= snakeLen/2 ? 0 : 50/enemyProximity // default length/2 = 4
+                        enemyProximity == 0 || enemyProximity >= 4 ? 0 : 100/Math.sqrt(enemyProximity)
                 )
         ) / moves;
     }

@@ -9,6 +9,7 @@ import ru.codebattle.client.api.Direction;
 import ru.codebattle.client.api.SnakeAction;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.codebattle.client.api.BoardElement.*;
 
@@ -186,7 +187,8 @@ public class Snake {
 
                 for (Set<BoardPoint> areaPointsList : areaPoints) {
                     if (areaPointsList.contains(BoardPoint.of(col, row))) {
-                        weightsMap[col][row].setConnected(areaPointsList.size());
+                        if (areaPointsList.size() > weightsMap[col][row].getConnected())
+                            weightsMap[col][row].setConnected(areaPointsList.size());
                     }
                 }
 
@@ -194,7 +196,11 @@ public class Snake {
                     if (enemy.getWeightsMap()[col][row] != null) {
                         int proximity = enemy.getWeightsMap()[col][row].getMoves();
                         //Math.abs(weightsMap[enemy.getBody().getFirst().getX()][enemy.getBody().getFirst().getY()].getMoves() - weightsMap[col][row].getMoves());
-                        boolean canEat = (fury >= weightsMap[col][row].getMoves()) && ((body.size() >= enemy.getBody().size() + 2) || (enemy.getFury() == 0));
+                        boolean canEat = ((fury > weightsMap[col][row].getMoves()) && (body.size() >= enemy.getBody().size() + 2))
+                                || (((fury > weightsMap[col][row].getMoves()) || (body.size() >= enemy.getBody().size() + 2)) && (enemy.getFury() <= enemy.getWeightsMap()[col][row].getMoves()));
+                        if (room[col][row].equals(FURY_PILL) && weightsMap[col][row].getMoves() <= proximity) {
+                            canEat = ((body.size() >= enemy.getBody().size() + 2) || (enemy.getFury() == 0));
+                        }
                         if ((weightsMap[col][row].getEnemyProximity() > proximity) && !canEat) {
                             weightsMap[col][row].setEnemyProximity(proximity);
                         }
@@ -326,9 +332,9 @@ public class Snake {
     private BoardPoint findDestinationRoute(BoardPoint src, Room roomObj) {
         Map<BoardPoint, List<BoardPoint>> routePoints = new HashMap<>();
 
-        calcWeightMap(src, roomObj, false, routePoints);
-
         roomObj.getEnemies().parallelStream().forEach(enemy -> enemy.calcWeightMap(enemy.getBody().getFirst(), roomObj, true, new HashMap<>()));
+
+        calcWeightMap(src, roomObj, false, routePoints);
 
         findDestinationPointOnWM(src, routePoints, roomObj);
 
@@ -413,7 +419,10 @@ public class Snake {
                         )
                         .findFirst().orElse(null);
 
-                if (room[wP.getX()][wP.getY()].equals(BoardElement.STONE)) {
+                if (room[wP.getX()][wP.getY()].equals(BoardElement.WALL)) {
+                    weightMap[wP.getX()][wP.getY()].setScore(WALL.getScore());
+                    return null;
+                } else if (room[wP.getX()][wP.getY()].equals(BoardElement.STONE)) {
                     if (fury < moveCount && body.size() < 5) {
                         weightMap[wP.getX()][wP.getY()].setScore(WALL.getScore());
                         return null;
@@ -437,35 +446,63 @@ public class Snake {
                     if (fury >= moveCount) {
                         Snake snake = roomObj.getEnemies().parallelStream().filter(enemy -> enemy.getBody().contains(wP)).findFirst().orElse(null);
                         if (snake != null)
-                            weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore() * snake.getBody().size() - snake.getBody().indexOf(wP) - 1);
+                            weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore() * (snake.getBody().size() - snake.getBody().indexOf(wP) - 1));
                         else
                             Main.writeToFile("ENEMY", wP.toString() + " not found in enemy body.");
                     } else {
                         weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
                     }
                 } else if (targetEnemy != null) {
+                    if (targetEnemy.getBody().getFirst().equals(wP)) {
+                        boolean canEat = (((fury >= moveCount) || (body.size() >= targetEnemy.getBody().size() + 2)) && (targetEnemy.getFury() == 0))
+                        || ((fury >= moveCount) && (body.size() >= targetEnemy.getBody().size() + 2));
+                        if (canEat) {
+                            weightMap[wP.getX()][wP.getY()].setScore(30 * targetEnemy.getBody().size());
+                            weightMap[wP.getX()][wP.getY()].setConnected(getBody().size()); // ignore closed area, always have exit as enemy has and i have an enter
+                        } else {
+                            weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
+                            return null;
+                        }
+                    } else {
+                        boolean canEat = (fury >= moveCount) && ((body.size() >= targetEnemy.getBody().size() + 2) || (targetEnemy.getFury() == 0));
+                        if (canEat) {
+                            if (weightMap[wP.getX()][wP.getY()].getScore() >= -1) {
+                                weightMap[wP.getX()][wP.getY()].setScore(10 * targetEnemy.getBody().size());
+                                if (weightMap[wP.getX()][wP.getY()].getConnected() < targetEnemy.getBody().size())
+                                    weightMap[wP.getX()][wP.getY()].setConnected(targetEnemy.getBody().size()); // have a connected area with enemy body, i can eat it
+                            }
+                        } else {
+                            weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
+                            return null;
+                        }
+                    }
+/*
                     boolean canEat = (fury >= moveCount) && ((body.size() >= targetEnemy.getBody().size() + 2) || (targetEnemy.getFury() == 0));
                     if (canEat) {
                         if (targetEnemy.getBody().getFirst().equals(wP)) {
                             weightMap[wP.getX()][wP.getY()].setScore(30 * targetEnemy.getBody().size());
+                            weightMap[wP.getX()][wP.getY()].setConnected(getBody().size()); // ignore closed area, always have exit as enemy has and i have an enter
                         } else {
-                            weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore());
+                            if (weightMap[wP.getX()][wP.getY()].getScore() >= -1) {
+                                weightMap[wP.getX()][wP.getY()].setScore(10 * targetEnemy.getBody().size());
+                                if (weightMap[wP.getX()][wP.getY()].getConnected() < targetEnemy.getBody().size())
+                                    weightMap[wP.getX()][wP.getY()].setConnected(targetEnemy.getBody().size()); // have a connected area with enemy body, i can eat it
+                            }
                         }
                     } else {
                         weightMap[wP.getX()][wP.getY()].setScore(ENEMY_HEAD_EVIL.getScore());
                         return null;
                     }
-/*
+*/
             } else if (room[wP.getX()][wP.getY()].equals(FURY_PILL)) {
                 List<Integer> enemyDistance = roomObj.getEnemies().parallelStream().map(snake -> {
-                    return Math.abs(snake.getBody().getFirst().getX() - wP.getX()) + Math.abs(snake.getBody().getFirst().getY() - wP.getY());
+                    return snake.getWeightsMap()[wP.getX()][wP.getY()].getMoves();
                 }).collect(Collectors.toList());
                 enemyDistance.forEach(dst -> {
-                    if ((moveCount < dst) && (fury + FURY_TIME > dst / 2)) {
+                    if (moveCount <= dst) {//((moveCount < dst) && (fury + FURY_TIME > dst / 2)) {
                         weightMap[wP.getX()][wP.getY()].setScore(FURY_PILL.getScore());
                     }
                 });
-*/
                 } else if (BoardElement.BODY.contains(room[wP.getX()][wP.getY()])) {
                     int cutSize = getBody().size() - getBody().indexOf(wP) - 1;
                     weightMap[wP.getX()][wP.getY()].setScore(room[wP.getX()][wP.getY()].getScore() * cutSize);
